@@ -1,0 +1,348 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Skycast — prévisions météo claires et simples.">
+  <title>Skycast — La météo en toute clarté</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style>
+    * { font-family: "DM Sans", sans-serif; }
+    body { background: #f4f7fc; color: #1a263b; }
+
+    .sun-illustration {
+      position: relative; width: 112px; height: 112px; border-radius: 50%;
+      background: #ffc857; box-shadow: 0 0 0 17px rgba(255,200,87,.13), 0 0 0 34px rgba(255,200,87,.07);
+    }
+
+    .sun-illustration::before {
+      content: ""; position: absolute; inset: -23px; border: 4px dashed #ffc857;
+      border-radius: 50%; opacity: .8;
+    }
+
+    .sun-illustration::after {
+      content: ""; position: absolute; inset: 19px; background: #ffda83; border-radius: 50%;
+    }
+
+    .mini-sun {
+      display: inline-block; width: 27px; height: 27px; border-radius: 50%;
+      background: #ffc857; box-shadow: 0 0 0 6px #fff4d9;
+    }
+
+    .cloud-icon {
+      position: relative; display: inline-block; width: 34px; height: 15px;
+      margin-top: 10px; border-radius: 20px; background: #dceafa;
+    }
+
+    .cloud-icon::before {
+      content: ""; position: absolute; width: 18px; height: 18px; left: 6px; top: -9px;
+      border-radius: 50%; background: #dceafa;
+    }
+
+    .cloud-icon::after {
+      content: ""; position: absolute; width: 13px; height: 13px; right: 4px; top: -6px;
+      border-radius: 50%; background: #dceafa;
+    }
+
+    .rain-icon { position: relative; display: inline-block; }
+    .rain-icon .cloud-icon { margin-bottom: 8px; }
+
+    .rain-icon::after {
+      content: "╱  ╱  ╱"; position: absolute; left: 2px; top: 20px;
+      color: #4e9dd8; font-size: 11px; letter-spacing: 1px; white-space: nowrap;
+    }
+
+    .metric-card { min-height: 76px; border-radius: 14px; background: #f4f7fc; padding: 12px 14px; }
+    .temp-track { height: 5px; overflow: hidden; border-radius: 10px; background: #e8edf5; }
+    .temp-track span { display: block; height: 100%; border-radius: 10px; background: #ffc857; }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto min-h-screen max-w-[1440px] px-5 pb-10 pt-6 sm:px-8 lg:px-14">
+
+    <!-- EN-TÊTE -->
+    <header class="flex flex-wrap items-center justify-between gap-4">
+      <a href="#" class="flex items-center gap-3" aria-label="Accueil Skycast">
+        <span class="grid h-11 w-11 place-items-center rounded-[14px] bg-[#13254a] text-2xl text-[#ffc857]">☼</span>
+        <span>
+          <span class="block text-[21px] font-bold tracking-wide text-[#13254a]">SKYCAST</span>
+          <span class="block text-[9px] font-bold tracking-[.18em] text-slate-500">LA MÉTÉO EN TOUTE CLARTÉ</span>
+        </span>
+      </a>
+
+      <nav class="hidden items-center gap-9 md:flex" aria-label="Navigation principale">
+        <a href="#today" class="text-sm font-semibold text-[#13254a]">Aujourd’hui</a>
+        <a href="#forecast" class="text-sm font-medium text-slate-500 hover:text-[#13254a]">Prévisions</a>
+      </nav>
+
+      <form id="search-form" class="order-3 flex w-full gap-2 md:order-none md:w-auto">
+        <label class="flex min-w-0 flex-1 items-center gap-3 rounded-[14px] border border-slate-200 bg-white px-4 md:w-[290px]">
+          <span class="text-xl text-slate-400" aria-hidden="true">⌕</span>
+          <input id="city-input" type="search" name="city" placeholder="Rechercher une ville..."
+            class="w-full bg-transparent py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400"
+            autocomplete="off" aria-label="Nom de la ville">
+            
+        </label>
+        <button id="search-button" type="submit"
+          class="rounded-[11px] bg-[#386ec7] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#285ba9]">
+          Recherche
+        </button>
+      </form>
+      <div>
+      <p id="erreur" class="text-red-700"></p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex rounded-[14px] border border-slate-200 bg-white p-1" aria-label="Unité de température">
+          <button id="celsius-button" type="button" class="rounded-[10px] bg-[#13254a] px-3 py-2 text-sm font-bold text-white">°C</button>
+          <button id="fahrenheit-button" type="button" class="rounded-[10px] px-3 py-2 text-sm font-semibold text-slate-500">°F</button>
+        </div>
+      
+    </header>
+
+    <!-- PRÉSENTATION -->
+    <section class="mt-9 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-[#1a263b] sm:text-[28px]">Bonjour</h1>
+        <p class="mt-1 text-sm text-slate-500">Voici les conditions météo dans votre ville.</p>
+      </div>
+      <p id="last-updated" class="text-[10px] font-bold tracking-wider text-slate-400">DERNIÈRE MISE À JOUR • --:--</p>
+    </section>
+
+    <!-- MÉTÉO ACTUELLE ET DÉTAILS -->
+    <main id="today" class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.7fr_1fr]">
+      <section class="relative min-h-[292px] overflow-hidden rounded-[24px] bg-[#13254a] p-7 text-white sm:p-8" aria-label="Météo actuelle">
+        <div class="relative z-10">
+          <p id="city-name" class="text-xs font-bold tracking-widest text-blue-100">NADOR, MAROC</p>
+          <p id="current-date" class="mt-2 text-sm text-blue-100/90">Mardi 10 novembre</p>
+          <div class="mt-5 flex items-start gap-3">
+            <p id="current-temperature" class="text-[76px] font-medium leading-none tracking-tight sm:text-[88px]">24°</p>
+          </div>
+          <p id="weather-description" class="mt-3 text-lg font-semibold">Ensoleillé avec quelques nuages</p>
+          <p class="mt-2 text-sm text-blue-100">
+            Max. : <span id="temperature-max">27°</span>
+            <span class="mx-2">Min. :</span><span id="temperature-min">17°</span>
+          </p>
+        </div>
+
+        <div class="pointer-events-none absolute right-12 top-16 hidden sm:block">
+          <div class="sun-illustration"></div>
+        </div>
+
+        <div class="mt-7 flex items-center gap-3 border-t border-white/15 pt-4 sm:absolute sm:bottom-5 sm:left-8 sm:right-8 sm:mt-0">
+          <div>
+            <p id="feels-like" class="mt-1 text-2xl font-semibold">26°</p>
+          </div>
+          <p class="ml-auto max-w-[230px] text-right text-xs text-blue-100">Le ciel restera dégagé dans l’après-midi.</p>
+        </div>
+      </section>
+
+      <section class="rounded-[24px] bg-white p-6 sm:p-7" aria-label="Détails météo">
+        <h2 class="text-lg font-bold text-[#1a263b]">Détails météo</h2>
+        <p class="mt-1 text-xs text-slate-500">Conditions actuelles</p>
+
+        <div class="mt-5 grid grid-cols-2 gap-3">
+          <article class="metric-card">
+            <p class="text-[9px] font-bold tracking-widest text-slate-500">HUMIDITÉ</p>
+            <p id="humidity" class="mt-1 text-xl font-bold">58%</p>
+            <p class="mt-1 text-[10px] text-slate-500">Humidité relative</p>
+          </article>
+
+          <article class="metric-card">
+            <p class="text-[9px] font-bold tracking-widest text-slate-500">VENT</p>
+            <p id="wind-speed" class="mt-1 text-xl font-bold">14 km/h</p>
+            <p class="mt-1 text-[10px] text-slate-500">Légère brise</p>
+          </article>
+
+          <article class="metric-card">
+            <p class="text-[9px] font-bold tracking-widest text-slate-500">INDICE UV</p>
+            <p id="uv-index" class="mt-1 text-xl font-bold">5 sur 11</p>
+            <p class="mt-1 text-[10px] text-slate-500">Modéré</p>
+          </article>
+
+          <article class="metric-card">
+            <p class="text-[9px] font-bold tracking-widest text-slate-500">VISIBILITÉ</p>
+            <p id="visibility" class="mt-1 text-xl font-bold">10 km</p>
+            <p class="mt-1 text-[10px] text-slate-500">Très bonne</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- PRÉVISIONS HORAIRES -->
+    <section class="mt-9" aria-labelledby="hourly-heading">
+      <div class="mb-4 flex items-end justify-between">
+        <div>
+          <h2 id="hourly-heading" class="text-lg font-bold">Prévisions du jour</h2>
+          <p class="mt-1 text-xs text-slate-500">Les 12 prochaines heures</p>
+        </div>
+        <a href="#hourly-list" class="hidden text-[10px] font-bold tracking-wide text-[#386ec7] sm:block">VOIR LES 24 HEURES →</a>
+      </div>
+
+      <div id="hourly-list" class="grid grid-cols-3 gap-2 rounded-[20px] bg-white p-4 sm:grid-cols-4 sm:gap-3 md:grid-cols-7 md:p-6">
+        <article class="flex flex-col items-center gap-4 rounded-xl bg-blue-50 px-2 py-4">
+          <p class="text-[10px] font-bold text-[#386ec7]">MAINT.</p>
+          <span class="mini-sun mt-2" aria-hidden="true"></span>
+          <p class="text-base font-bold">24°</p>
+        </article>
+
+        <article class="flex flex-col items-center gap-4 px-2 py-4">
+          <p class="text-[10px] font-bold text-slate-500">11 H</p>
+          <span class="mini-sun mt-2" aria-hidden="true"></span>
+          <p class="text-base font-bold">25°</p>
+        </article>
+
+        <article class="flex flex-col items-center gap-4 px-2 py-4">
+          <p class="text-[10px] font-bold text-slate-500">12 H</p>
+          <span class="mini-sun mt-2" aria-hidden="true"></span>
+          <p class="text-base font-bold">26°</p>
+        </article>
+
+        <article class="flex flex-col items-center gap-4 px-2 py-4">
+          <p class="text-[10px] font-bold text-slate-500">13 H</p>
+          <span class="mini-sun mt-2" aria-hidden="true"></span>
+          <p class="text-base font-bold">27°</p>
+        </article>
+
+        <article class="flex flex-col items-center gap-4 px-2 py-4">
+          <p class="text-[10px] font-bold text-slate-500">14 H</p>
+          <span class="cloud-icon" aria-hidden="true"></span>
+          <p class="text-base font-bold">26°</p>
+        </article>
+
+        <article class="flex flex-col items-center gap-4 px-2 py-4">
+          <p class="text-[10px] font-bold text-slate-500">15 H</p>
+          <span class="cloud-icon" aria-hidden="true"></span>
+          <p class="text-base font-bold">25°</p>
+        </article>
+
+        <article class="flex flex-col items-center gap-4 px-2 py-4">
+          <p class="text-[10px] font-bold text-slate-500">16 H</p>
+          <span class="cloud-icon" aria-hidden="true"></span>
+          <p class="text-base font-bold">23°</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- PRÉVISIONS SUR 7 JOURS -->
+    <section id="forecast" class="mt-9 grid grid-cols-1 gap-6 xl:grid-cols-[1.7fr_1fr]">
+      <div>
+        <div class="mb-4">
+          <h2 class="text-lg font-bold">Prévisions sur 7 jours</h2>
+          <p class="mt-1 text-xs text-slate-500">Aperçu de la météo pour la semaine à venir</p>
+        </div>
+
+        <div id="daily-list" class="divide-y divide-slate-100 rounded-[20px] bg-white px-5">
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">MER.</span>
+            <span class="mini-sun mx-auto" aria-hidden="true"></span>
+            <div class="temp-track"><span style="width:72%"></span></div>
+            <span class="text-right text-sm font-bold">26° <span class="font-medium text-slate-400">17°</span></span>
+          </article>
+
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">JEU.</span>
+            <span class="cloud-icon mx-auto" aria-hidden="true"></span>
+            <div class="temp-track"><span style="width:60%"></span></div>
+            <span class="text-right text-sm font-bold">24° <span class="font-medium text-slate-400">16°</span></span>
+          </article>
+
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">VEN.</span>
+            <span class="rain-icon mx-auto"><span class="cloud-icon" aria-hidden="true"></span></span>
+            <div class="temp-track"><span style="width:48%;background:#67b8d5"></span></div>
+            <span class="text-right text-sm font-bold">22° <span class="font-medium text-slate-400">15°</span></span>
+          </article>
+
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">SAM.</span>
+            <span class="cloud-icon mx-auto" aria-hidden="true"></span>
+            <div class="temp-track"><span style="width:54%"></span></div>
+            <span class="text-right text-sm font-bold">23° <span class="font-medium text-slate-400">16°</span></span>
+          </article>
+
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">DIM.</span>
+            <span class="mini-sun mx-auto" aria-hidden="true"></span>
+            <div class="temp-track"><span style="width:68%"></span></div>
+            <span class="text-right text-sm font-bold">25° <span class="font-medium text-slate-400">17°</span></span>
+          </article>
+
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">LUN.</span>
+            <span class="mini-sun mx-auto" aria-hidden="true"></span>
+            <div class="temp-track"><span style="width:82%"></span></div>
+            <span class="text-right text-sm font-bold">27° <span class="font-medium text-slate-400">18°</span></span>
+          </article>
+
+          <article class="grid grid-cols-[48px_40px_1fr_42px] items-center gap-3 py-3">
+            <span class="text-[10px] font-bold text-slate-500">MAR.</span>
+            <span class="cloud-icon mx-auto" aria-hidden="true"></span>
+            <div class="temp-track"><span style="width:76%"></span></div>
+            <span class="text-right text-sm font-bold">26° <span class="font-medium text-slate-400">17°</span></span>
+          </article>
+        </div>
+      </div>
+
+      <!-- LEVER DU SOLEIL ET QUALITÉ DE L'AIR -->
+      <div class="flex flex-col gap-5">
+        <section class="rounded-[20px] bg-white p-6" aria-label="Lever et coucher du soleil">
+          <h2 class="text-base font-bold">Lever et coucher du soleil</h2>
+
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-[9px] font-bold tracking-widest text-slate-500">LEVER DU SOLEIL</p>
+              <p id="sunrise" class="mt-2 text-xl font-bold">06:48</p>
+            </div>
+
+            <div>
+              <p class="text-[9px] font-bold tracking-widest text-slate-500">COUCHER DU SOLEIL</p>
+              <p id="sunset" class="mt-2 text-xl font-bold">17:42</p>
+            </div>
+          </div>
+
+          <div class="mt-6 h-[5px] overflow-hidden rounded-full bg-slate-100">
+            <div class="h-full w-[58%] rounded-full bg-[#ffc857]"></div>
+          </div>
+        </section>
+
+        <section class="rounded-[20px] bg-white p-6" aria-label="Qualité de l’air">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-base font-bold">Qualité de l’air</h2>
+            <span id="air-quality" class="rounded-full bg-emerald-50 px-3 py-2 text-[10px] font-bold text-emerald-700">BONNE • 32</span>
+          </div>
+
+          <p class="mt-5 text-sm leading-6 text-slate-500">
+            La qualité de l’air est satisfaisante. Profitez de vos activités en plein air.
+          </p>
+
+          <div class="mt-6 h-2 rounded-full bg-gradient-to-r from-emerald-400 via-yellow-300 to-rose-400"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- MESSAGES DE CHARGEMENT ET D'ERREUR -->
+    <p id="loading-message" class="mt-6 hidden text-center text-sm font-medium text-[#386ec7]" role="status">
+      Chargement des données météo...
+    </p>
+
+    <p id="error-message" class="mt-3 hidden rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert"></p>
+
+    <footer class="mt-10 border-t border-slate-200 pt-5 text-center text-xs text-slate-400">
+      Données météo fournies par
+      <a href="https://open-meteo.com/" target="_blank" rel="noreferrer" class="font-semibold text-slate-500 underline">Open-Meteo</a>
+    </footer>
+  </div>
+
+<script src="/main.js"></script> 
+
+</body>
+</html>
