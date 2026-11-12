@@ -9,6 +9,7 @@ const min = document.getElementById("temperature-min")
 const date = document.getElementById("current-date")
 const ville = document.getElementById("city-name")
 const humidite = document.getElementById("humidity")
+const vent = document.getElementById("wind-speed")
 
 
 button.addEventListener("click", async function(event) {
@@ -41,6 +42,7 @@ button.addEventListener("click", async function(event) {
         });
         ville.textContent = cityInfo.name
         humidite.textContent = cityTemp.current.relative_humidity_2m + "%"
+        vent.textContent = cityTemp.current.wind_speed_10m + " km/h"
         
     } 
     catch (error) {
@@ -52,7 +54,7 @@ button.addEventListener("click", async function(event) {
 });
 
 async function temperature(latitude,longitude) {
-const response =  await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&current=temperature_2m,relative_humidity_2m&forecast_days=5`)
+const response =  await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&current=temperature_2m,relative_humidity_2m,wind_speed_10m&forecast_days=5`)
 if(!response.ok) {
   return "the tempetor is not found"
 }
