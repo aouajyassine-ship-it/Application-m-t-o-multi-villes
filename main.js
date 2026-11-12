@@ -12,8 +12,13 @@ const humidite = document.getElementById("humidity")
 const vent = document.getElementById("wind-speed")
 const uv = document.getElementById("uv-index")
 const visibilite = document.getElementById("visibility")
-
-
+const maint = document.getElementById("mainteneant")
+const anze = document.getElementById("11")
+const douze = document.getElementById("12")
+const un = document.getElementById("13")
+const deux = document.getElementById("14")
+const  trois = document.getElementById("15")
+const  quatre = document.getElementById("16")
 button.addEventListener("click", async function(event) {
     event.preventDefault();
     if (input.value.trim() === "") {
@@ -47,6 +52,16 @@ button.addEventListener("click", async function(event) {
         vent.textContent = cityTemp.current.wind_speed_10m + " km/h"
         uv.textContent = cityTemp.current.uv_index
         visibilite.textContent = cityTemp.current.visibility + "Km"
+        maint.textContent = cityTemp.current.temperature_2m + "°"
+        anze.textContent = cityTemp.hourly.temperature_2m[15] + "°"
+        douze.textContent = cityTemp.hourly.temperature_2m[16] + "°"
+        un.textContent = cityTemp.hourly.temperature_2m[17] + "°"
+        deux.textContent = cityTemp.hourly.temperature_2m[18] + "°"
+        trois.textContent = cityTemp.hourly.temperature_2m[19] + "°"
+        quatre.textContent = cityTemp.hourly.temperature_2m[20] + "°"
+        // console.log(cityTemp.hourly.time[10])
+        // console.log(cityTemp.hourly.temperature_2m[10])
+        // console.log(cityTemp.hourly.time)
 
         
     } 
@@ -59,7 +74,7 @@ button.addEventListener("click", async function(event) {
 });
 
 async function temperature(latitude,longitude) {
-const response =  await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index,visibility&forecast_days=5`)
+const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=temperature_2m&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index,visibility&forecast_days=5&forecast_hours=24&timezone=auto`)
 if(!response.ok) {
   return "the tempetor is not found"
 }
@@ -72,6 +87,8 @@ async function city(name) {
   const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${name}&count=10&language=fr&format=json`)
   if(response.ok) {
     const data = await response.json()
+    // console.log(data)
+    // console.log(data.daily)
     return data.results[0]
   } else {
     return "the city is not found"
