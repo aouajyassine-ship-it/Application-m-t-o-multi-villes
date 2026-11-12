@@ -37,9 +37,9 @@ button.addEventListener("click", async function(event) {
             cityInfo.longitude
         );
         console.log(cityInfo, cityTemp);
-        temperatur.textContent = cityTemp.current.temperature_2m + "°";
-        max.textContent = cityTemp.daily.temperature_2m_max[0] +"°";
-        min.textContent = cityTemp.daily.temperature_2m_min[0] + "°";
+        temperatur.textContent = cityTemp.current.temperature_2m + " \u00B0C";
+        max.textContent = cityTemp.daily.temperature_2m_max[0] +" \u00B0C";
+        min.textContent = cityTemp.daily.temperature_2m_min[0] + " \u00B0C";
         const dateMeteo = new Date(cityTemp.daily.time[0])
         date.textContent = dateMeteo.toLocaleDateString("fr-FR",{
           weekday : "long",
@@ -52,13 +52,13 @@ button.addEventListener("click", async function(event) {
         vent.textContent = cityTemp.current.wind_speed_10m + " km/h"
         uv.textContent = cityTemp.current.uv_index
         visibilite.textContent = cityTemp.current.visibility + "Km"
-        maint.textContent = cityTemp.current.temperature_2m + "°"
-        anze.textContent = cityTemp.hourly.temperature_2m[15] + "°"
-        douze.textContent = cityTemp.hourly.temperature_2m[16] + "°"
-        un.textContent = cityTemp.hourly.temperature_2m[17] + "°"
-        deux.textContent = cityTemp.hourly.temperature_2m[18] + "°"
-        trois.textContent = cityTemp.hourly.temperature_2m[19] + "°"
-        quatre.textContent = cityTemp.hourly.temperature_2m[20] + "°"
+        maint.textContent = cityTemp.current.temperature_2m + " \u00B0C"
+        anze.textContent = cityTemp.hourly.temperature_2m[15] + " \u00B0C"
+        douze.textContent = cityTemp.hourly.temperature_2m[16] + " \u00B0C"
+        un.textContent = cityTemp.hourly.temperature_2m[17] + " \u00B0C"
+        deux.textContent = cityTemp.hourly.temperature_2m[18] + " \u00B0C"
+        trois.textContent = cityTemp.hourly.temperature_2m[19] + " \u00B0C"
+        quatre.textContent = cityTemp.hourly.temperature_2m[20] + " \u00B0C"
         // console.log(cityTemp.hourly.time[10])
         // console.log(cityTemp.hourly.temperature_2m[10])
         // console.log(cityTemp.hourly.time)
