@@ -19,6 +19,46 @@ const un = document.getElementById("13")
 const deux = document.getElementById("14")
 const  trois = document.getElementById("15")
 const  quatre = document.getElementById("16")
+const icon11 = document.getElementById("icon-11")
+const icon12 = document.getElementById("icon-12")
+const icon13 = document.getElementById("icon-13")
+const icon14 = document.getElementById("icon-14")
+const icon15 = document.getElementById("icon-15")
+const icon16 = document.getElementById("icon-16")
+
+
+const WEATHER_CODES = {
+  0:  { label: "Ciel dégagé",            icon: "☀️" },
+  1:  { label: "Plutôt dégagé",          icon: "🌤️" },
+  2:  { label: "Partiellement nuageux",  icon: "⛅" },
+  3:  { label: "Couvert",                icon: "☁️" },
+  45: { label: "Brouillard",             icon: "🌫️" },
+  48: { label: "Brouillard givrant",     icon: "🌫️" },
+  51: { label: "Bruine légère",          icon: "🌦️" },
+  53: { label: "Bruine",                 icon: "🌦️" },
+  55: { label: "Bruine forte",           icon: "🌦️" },
+  56: { label: "Bruine verglaçante",     icon: "🌧️" },
+  57: { label: "Bruine verglaçante",     icon: "🌧️" },
+  61: { label: "Pluie légère",           icon: "🌧️" },
+  63: { label: "Pluie",                  icon: "🌧️" },
+  65: { label: "Pluie forte",            icon: "🌧️" },
+  66: { label: "Pluie verglaçante",      icon: "🌧️" },
+  67: { label: "Pluie verglaçante",      icon: "🌧️" },
+  71: { label: "Neige légère",           icon: "🌨️" },
+  73: { label: "Neige",                  icon: "🌨️" },
+  75: { label: "Neige forte",            icon: "❄️" },
+  77: { label: "Grains de neige",        icon: "🌨️" },
+  80: { label: "Averses légères",        icon: "🌦️" },
+  81: { label: "Averses",                icon: "🌧️" },
+  82: { label: "Averses violentes",      icon: "⛈️" },
+  85: { label: "Averses de neige",       icon: "🌨️" },
+  86: { label: "Fortes averses de neige", icon: "❄️" },
+  95: { label: "Orage",                  icon: "⛈️" },
+  96: { label: "Orage avec grêle",       icon: "⛈️" },
+  99: { label: "Orage avec forte grêle", icon: "⛈️" },
+};
+
+
 button.addEventListener("click", async function(event) {
     event.preventDefault();
     if (input.value.trim() === "") {
@@ -62,8 +102,18 @@ button.addEventListener("click", async function(event) {
         // console.log(cityTemp.hourly.time[10])
         // console.log(cityTemp.hourly.temperature_2m[10])
         // console.log(cityTemp.hourly.time)
-
-        
+        const meteo11 = WEATHER_CODES[cityTemp.hourly.weather_code[15]]
+        icon11.textContent = meteo11.icon
+        const meteo12 = WEATHER_CODES[cityTemp.hourly.weather_code[16]]
+        icon12.textContent = meteo12.icon
+        const meteo13 = WEATHER_CODES[cityTemp.hourly.weather_code[17]]
+        icon13.textContent = meteo13.icon
+        const meteo14 = WEATHER_CODES[cityTemp.hourly.weather_code[18]]
+        icon14.textContent = meteo14.icon
+        const meteo15 = WEATHER_CODES[cityTemp.hourly.weather_code[19]]
+        icon15.textContent = meteo15.icon
+        const meteo16 = WEATHER_CODES[cityTemp.hourly.weather_code[20]]
+        icon16.textContent = meteo16.icon
     } 
     catch (error) {
         erreur.textContent = error.message;
@@ -74,7 +124,7 @@ button.addEventListener("click", async function(event) {
 });
 
 async function temperature(latitude,longitude) {
-const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=temperature_2m&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index,visibility&forecast_days=5&forecast_hours=24&timezone=auto`)
+const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weather_code&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index,visibility&forecast_days=5&forecast_hours=24&timezone=auto`)
 if(!response.ok) {
   return "the tempetor is not found"
 }
