@@ -26,7 +26,7 @@ const icon14 = document.getElementById("icon-14")
 const icon15 = document.getElementById("icon-15")
 const icon16 = document.getElementById("icon-16")
 const retryButton = document.getElementById("errorr")
-
+const dailyList = document.getElementById("daily-list")
 
 const WEATHER_CODES = {
   0:  { label: "Ciel dégagé",            icon: "☀️" },
@@ -77,6 +77,7 @@ button.addEventListener("click", async function(event) {
             cityInfo.latitude,
             cityInfo.longitude
         );
+        afficherPrevisions(cityTemp.daily);
         console.log(cityInfo, cityTemp);
         temperatur.textContent = cityTemp.current.temperature_2m + " \u00B0C";
         max.textContent = cityTemp.daily.temperature_2m_max[0] +" \u00B0C";
@@ -130,6 +131,8 @@ button.addEventListener("click", async function(event) {
     event.preventDefault();
     document.getElementById("search-form").requestSubmit();
 });
+
+
 async function city(name) {
   const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${name}&count=10&language=fr&format=json`)
   if (response.ok) {
@@ -141,6 +144,56 @@ async function city(name) {
   } else {
     throw new Error("Impossible de rechercher cette ville.");
   }
+}
+
+async function temperature(latitude, longitude) {
+    const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weather_code&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index,visibility&forecast_days=5&forecast_hours=24&timezone=auto`
+    );
+    if (!response.ok) {
+        throw new Error("Impossible de récupérer les données météo.");
+    }
+    const data = await response.json();
+    return data;
+}
+
+function afficherPrevisions(daily) {
+    dailyList.innerHTML = "";
+    for (let i = 0; i < daily.time.length; i++) {
+        // Récupérer la date
+        const date = new Date(daily.time[i] + "T00:00:00");
+
+        const jour = date.toLocaleDateString("fr-FR", {
+            weekday: "short"
+        }).replace(".", "").toUpperCase();
+
+        // récupére les températures
+        const max = daily.temperature_2m_max[i];
+        const min = daily.temperature_2m_min[i];
+
+        // récupérer les icones
+        const code = daily.weather_code[i];
+        const meteo = WEATHER_CODES[code];
+        const icon = meteo ? meteo.icon : "🌡️";
+
+        // créer une nouvelle ligne
+        const article = document.createElement("article");
+        article.className = "grid grid-cols-[48px_40px_1fr_65px] items-center gap-3 py-3";
+        article.innerHTML = `
+            <span class="text-[10px] font-bold text-slate-500">
+                ${jour}
+            </span>
+            <span class="mx-auto text-2xl" title="${meteo ? meteo.label : "Météo inconnue"}">
+                ${icon}
+            </span>
+            <div></div>
+            <span class="text-right text-sm font-bold whitespace-nowrap">
+                ${max}°
+                <span class="font-medium text-slate-400">${min}°</span>
+            </span>
+        `;
+        dailyList.appendChild(article);
+    }
 }
 
 
