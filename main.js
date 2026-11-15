@@ -25,6 +25,7 @@ const icon13 = document.getElementById("icon-13")
 const icon14 = document.getElementById("icon-14")
 const icon15 = document.getElementById("icon-15")
 const icon16 = document.getElementById("icon-16")
+const retryButton = document.getElementById("errorr")
 
 
 const WEATHER_CODES = {
@@ -114,36 +115,32 @@ button.addEventListener("click", async function(event) {
         icon15.textContent = meteo15.icon
         const meteo16 = WEATHER_CODES[cityTemp.hourly.weather_code[20]]
         icon16.textContent = meteo16.icon
+        retryButton.hidden = true;
     } 
     catch (error) {
-        erreur.textContent = error.message;
-    } 
+    erreur.textContent = error.message;
+    retryButton.hidden = false;
+}
     finally {
         recherche.hidden = true;
     }
 });
 
-async function temperature(latitude,longitude) {
-const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weather_code&current=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index,visibility&forecast_days=5&forecast_hours=24&timezone=auto`)
-if(!response.ok) {
-  return "the tempetor is not found"
-}
-const data = await response.json()
-// console.log(data)
-return data
-}
+ retryButton.addEventListener("click", function(event) {
+    event.preventDefault();
+    document.getElementById("search-form").requestSubmit();
+});
 async function city(name) {
-
   const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${name}&count=10&language=fr&format=json`)
-  if(response.ok) {
+  if (response.ok) {
     const data = await response.json()
-    // console.log(data)
-    // console.log(data.daily)
+    if (!data.results || data.results.length === 0) {
+      throw new Error("Cette ville n'existe pas. Vérifiez le nom.");
+    }
     return data.results[0]
   } else {
-    return "the city is not found"
+    throw new Error("Impossible de rechercher cette ville.");
   }
 }
-
 
 
